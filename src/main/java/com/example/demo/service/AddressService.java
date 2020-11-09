@@ -67,6 +67,30 @@ public class AddressService {
             invalidReasons.add("Street name cannot be empty");
         }
 
+        if (!Optional.ofNullable(addressDTO.getNumber()).isPresent()) {
+            invalidReasons.add("Number cannot be empty");
+        }
+
+        if (StringUtils.isNullOrEmpty(addressDTO.getNeighbourhood())) {
+            invalidReasons.add("Neighbourhood cannot be empty");
+        }
+
+        if (StringUtils.isNullOrEmpty(addressDTO.getCity())) {
+            invalidReasons.add("City name cannot be empty");
+        }
+
+        if (StringUtils.isNullOrEmpty(addressDTO.getState())) {
+            invalidReasons.add("State name cannot be empty");
+        }
+
+        if (StringUtils.isNullOrEmpty(addressDTO.getCountry())) {
+            invalidReasons.add("Country name cannot be empty");
+        }
+
+        if (StringUtils.isNullOrEmpty(addressDTO.getZipCode())) {
+            invalidReasons.add("Zip Code cannot be empty");
+        }
+
         if (!invalidReasons.isEmpty()) {
             throw new InvalidObjectException(invalidReasons);
         }
@@ -74,7 +98,14 @@ public class AddressService {
 
     private Address fromDTO(final AddressDTO addressDTO) {
         final Address address = new Address();
+        address.setCity(addressDTO.getCity());
+        address.setState(addressDTO.getState());
+        address.setNumber(addressDTO.getNumber());
+        address.setCountry(addressDTO.getCountry());
+        address.setZipCode(addressDTO.getZipCode());
+        address.setComplement(addressDTO.getComplement());
         address.setStreetName(addressDTO.getStreetName());
+        address.setNeighbourhood(addressDTO.getNeighbourhood());
         return address;
     }
 }

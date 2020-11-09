@@ -5,6 +5,7 @@ import com.example.demo.exception.InvalidObjectException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Address;
 import com.example.demo.repository.AddressRepository;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -35,12 +36,53 @@ public class AddressServiceTest {
     public void testAddressFound() {
         final Address address = new Address();
         address.setId(123L);
-        address.setStreetName("Av dos Amarais");
+        address.setCity("City");
+        address.setState("State");
+        address.setZipCode("ZipCode");
+        address.setCountry("Country");
+        address.setComplement("Complement");
+        address.setStreetName("Street name");
+        address.setNeighbourhood("Neighbourhood");
+        address.setNumber(321L);
 
         Mockito.when(addressRepository.findById(Mockito.any())).thenReturn(Optional.of(address));
+
         final AddressDTO addressDTO = addressService.findById(address.getId());
         assertThat(addressDTO).isNotNull();
+        assertThat(addressDTO.getCity()).isEqualTo(address.getCity());
+        assertThat(addressDTO.getState()).isEqualTo(address.getState());
+        assertThat(addressDTO.getNumber()).isEqualTo(address.getNumber());
+        assertThat(addressDTO.getZipCode()).isEqualTo(address.getZipCode());
+        assertThat(addressDTO.getCountry()).isEqualTo(address.getCountry());
+        assertThat(addressDTO.getComplement()).isEqualTo(address.getComplement());
         assertThat(addressDTO.getStreetName()).isEqualTo(address.getStreetName());
+        assertThat(addressDTO.getNeighbourhood()).isEqualTo(address.getNeighbourhood());
+    }
+
+    @Test
+    public void testValidateAddressAllNonNullableFields() {
+        final AddressDTO fullAddressDTO = getFullAddressDTO();
+        fullAddressDTO.setCity(null);
+        fullAddressDTO.setState(null);
+        fullAddressDTO.setNumber(null);
+        fullAddressDTO.setCountry(null);
+        fullAddressDTO.setZipCode(null);
+        fullAddressDTO.setStreetName(null);
+        fullAddressDTO.setNeighbourhood(null);
+
+        try {
+            addressService.create(fullAddressDTO);
+            Assert.fail();
+        } catch (InvalidObjectException e) {
+            final String message = e.getMessage();
+            assertThat(message.contains("Number cannot be empty")).isTrue();
+            assertThat(message.contains("Zip Code cannot be empty")).isTrue();
+            assertThat(message.contains("City name cannot be empty")).isTrue();
+            assertThat(message.contains("State name cannot be empty")).isTrue();
+            assertThat(message.contains("Street name cannot be empty")).isTrue();
+            assertThat(message.contains("Country name cannot be empty")).isTrue();
+            assertThat(message.contains("Neighbourhood cannot be empty")).isTrue();
+        }
     }
 
     @Test(expected = InvalidObjectException.class)
@@ -102,7 +144,16 @@ public class AddressServiceTest {
     private AddressDTO getFullAddressDTO() {
         final AddressDTO addressDTO = new AddressDTO();
         addressDTO.setId(123L);
+        addressDTO.setCity("City");
+        addressDTO.setState("State");
+        addressDTO.setZipCode("ZipCode");
+        addressDTO.setCountry("Country");
+        addressDTO.setComplement("Complement");
         addressDTO.setStreetName("Street name");
+        addressDTO.setNeighbourhood("Neighbourhood");
+        addressDTO.setNumber(321L);
+        addressDTO.setLatitude(1.2F);
+        addressDTO.setLongitude(2.1F);
         return addressDTO;
     }
 }
