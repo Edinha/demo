@@ -27,13 +27,13 @@ public class AddressController {
     }
 
     @PostMapping()
-    public void createAddress(@RequestBody AddressDTO newAddressDTO) {
-        this.addressService.create(newAddressDTO);
+    public AddressDTO createAddress(@RequestBody AddressDTO newAddressDTO) {
+        return this.addressService.create(newAddressDTO);
     }
 
     @PutMapping(value = "/{id}")
-    public void updateAddress(@PathVariable("id") Long id, @RequestBody AddressDTO newAddressDTO) {
-        this.addressService.update(id, newAddressDTO);
+    public AddressDTO updateAddress(@PathVariable("id") Long id, @RequestBody AddressDTO newAddressDTO) {
+        return this.addressService.update(id, newAddressDTO);
     }
 
     @DeleteMapping(value = "/{id}")

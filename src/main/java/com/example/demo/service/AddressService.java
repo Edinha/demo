@@ -30,15 +30,17 @@ public class AddressService {
         return new AddressDTO(byId.get());
     }
 
-    public void create(final AddressDTO newAddressDTO) {
+    public AddressDTO create(final AddressDTO newAddressDTO) {
         validateAddressFields(newAddressDTO);
 
         final Address address = fromDTO(newAddressDTO);
         address.setId(null);
         this.addressRepository.save(address);
+
+        return new AddressDTO(address);
     }
 
-    public void update(final Long id, final AddressDTO newAddressDTO) {
+    public AddressDTO update(final Long id, final AddressDTO newAddressDTO) {
         validateAddressFields(newAddressDTO);
 
         final Optional<Address> byId = this.addressRepository.findById(id);
@@ -49,6 +51,8 @@ public class AddressService {
         final Address address = fromDTO(newAddressDTO);
         address.setId(id);
         this.addressRepository.save(address);
+
+        return new AddressDTO(address);
     }
 
     public void deleteById(final Long id) {
