@@ -42,6 +42,12 @@ public class Address {
     @Column(name = "zip_code", nullable = false)
     private String zipCode;
 
+    @Column
+    private Float latitude;
+
+    @Column
+    private Float longitude;
+
     public Long getId() {
         return id;
     }
@@ -112,5 +118,21 @@ public class Address {
 
     public void setZipCode(String zipCode) {
         this.zipCode = zipCode;
+    }
+
+    public Float getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Float latitude) {
+        this.latitude = latitude;
+    }
+
+    public Float getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Float longitude) {
+        this.longitude = longitude;
     }
 }

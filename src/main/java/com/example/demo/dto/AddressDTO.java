@@ -26,6 +26,8 @@ public class AddressDTO {
         this.number = address.getNumber();
         this.country = address.getCountry();
         this.zipCode = address.getZipCode();
+        this.latitude = address.getLatitude();
+        this.longitude = address.getLongitude();
         this.streetName = address.getStreetName();
         this.complement = address.getComplement();
         this.neighbourhood = address.getNeighbourhood();

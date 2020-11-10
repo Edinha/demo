@@ -1,10 +1,12 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.AddressDTO;
+import com.example.demo.dto.GeolocationDTO;
 import com.example.demo.exception.InvalidObjectException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Address;
 import com.example.demo.repository.AddressRepository;
+import javafx.util.Pair;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,7 +23,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class AddressServiceTest {
 
     @Mock
+    private GeolocationDTO geolocationDTO;
+
+    @Mock
     private AddressRepository addressRepository;
+
+    @Mock
+    private GeolocationService geolocationService;
 
     @InjectMocks
     private AddressService addressService;
@@ -99,6 +107,37 @@ public class AddressServiceTest {
 
         addressService.create(fullAddressDTO);
         Mockito.verify(addressRepository, Mockito.times(1)).save(Mockito.any());
+        Mockito.verify(geolocationService, Mockito.times(0)).getGeolocationFromAddress(Mockito.any());
+    }
+
+    @Test
+    public void testCreateWithoutLatitudeAndLongitudeShouldCallGeolocationService() {
+        final AddressDTO fullAddressDTO = getFullAddressDTO();
+        fullAddressDTO.setLatitude(null);
+        fullAddressDTO.setLongitude(null);
+
+        Mockito.when(geolocationService.getGeolocationFromAddress(Mockito.any())).thenReturn(Optional.empty());
+
+        final AddressDTO result = addressService.create(fullAddressDTO);
+        assertThat(result.getLatitude()).isNull();
+        assertThat(result.getLongitude()).isNull();
+        Mockito.verify(addressRepository, Mockito.times(1)).save(Mockito.any());
+        Mockito.verify(geolocationService, Mockito.times(1)).getGeolocationFromAddress(Mockito.any());
+    }
+
+    @Test
+    public void testCreateWithoutLongitudeShouldCallGeolocationService() {
+        final AddressDTO fullAddressDTO = getFullAddressDTO();
+        fullAddressDTO.setLongitude(null);
+
+        Mockito.when(geolocationDTO.getCoordinates()).thenReturn(Optional.of(new Pair<>(3F, -3F)));
+        Mockito.when(geolocationService.getGeolocationFromAddress(Mockito.any())).thenReturn(Optional.of(geolocationDTO));
+
+        final AddressDTO result = addressService.create(fullAddressDTO);
+        assertThat(result.getLatitude()).isEqualTo(3F);
+        assertThat(result.getLongitude()).isEqualTo(-3F);
+        Mockito.verify(addressRepository, Mockito.times(1)).save(Mockito.any());
+        Mockito.verify(geolocationService, Mockito.times(1)).getGeolocationFromAddress(Mockito.any());
     }
 
     @Test(expected = InvalidObjectException.class)
@@ -123,6 +162,22 @@ public class AddressServiceTest {
 
         addressService.update(fullAddressDTO.getId(), fullAddressDTO);
         Mockito.verify(addressRepository, Mockito.times(1)).save(Mockito.any());
+    }
+
+    @Test
+    public void testUpdateWithoutLongitudeShouldCallGeolocationServiceEmptyResultShouldChangeNothing() {
+        final AddressDTO fullAddressDTO = getFullAddressDTO();
+        fullAddressDTO.setLatitude(null);
+        fullAddressDTO.setLongitude(null);
+
+        Mockito.when(addressRepository.findById(Mockito.any())).thenReturn(Optional.of(new Address()));
+        Mockito.when(geolocationService.getGeolocationFromAddress(Mockito.any())).thenReturn(Optional.empty());
+
+        final AddressDTO result = addressService.update(fullAddressDTO.getId(), fullAddressDTO);
+        assertThat(result.getLatitude()).isNull();
+        assertThat(result.getLongitude()).isNull();
+        Mockito.verify(addressRepository, Mockito.times(1)).save(Mockito.any());
+        Mockito.verify(geolocationService, Mockito.times(1)).getGeolocationFromAddress(Mockito.any());
     }
 
     @Test(expected = NotFoundException.class)

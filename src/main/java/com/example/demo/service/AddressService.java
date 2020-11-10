@@ -1,6 +1,7 @@
 package com.example.demo.service;
 
 import com.example.demo.dto.AddressDTO;
+import com.example.demo.dto.GeolocationDTO;
 import com.example.demo.exception.InvalidObjectException;
 import com.example.demo.exception.NotFoundException;
 import com.example.demo.model.Address;
@@ -16,9 +17,11 @@ import java.util.Optional;
 public class AddressService {
 
     private AddressRepository addressRepository;
+    private GeolocationService geolocationService;
 
-    public AddressService(AddressRepository addressRepository) {
+    public AddressService(AddressRepository addressRepository, GeolocationService geolocationService) {
         this.addressRepository = addressRepository;
+        this.geolocationService = geolocationService;
     }
 
     public AddressDTO findById(final Long id) {
@@ -35,6 +38,7 @@ public class AddressService {
 
         final Address address = fromDTO(newAddressDTO);
         address.setId(null);
+        fillGeolocationIfEmpty(address);
         this.addressRepository.save(address);
 
         return new AddressDTO(address);
@@ -50,6 +54,7 @@ public class AddressService {
 
         final Address address = fromDTO(newAddressDTO);
         address.setId(id);
+        fillGeolocationIfEmpty(address);
         this.addressRepository.save(address);
 
         return new AddressDTO(address);
@@ -62,6 +67,18 @@ public class AddressService {
         }
 
         this.addressRepository.deleteById(id);
+    }
+
+    private void fillGeolocationIfEmpty(final Address address) {
+        if (address.getLatitude() != null && address.getLongitude() != null) {
+            return;
+        }
+
+        final Optional<GeolocationDTO> geolocationFromAddress = this.geolocationService.getGeolocationFromAddress(address);
+        geolocationFromAddress.flatMap(GeolocationDTO::getCoordinates).ifPresent(coordinates -> {
+            address.setLatitude(coordinates.getKey());
+            address.setLongitude(coordinates.getValue());
+        });
     }
 
     private void validateAddressFields(final AddressDTO addressDTO) {
@@ -107,6 +124,8 @@ public class AddressService {
         address.setNumber(addressDTO.getNumber());
         address.setCountry(addressDTO.getCountry());
         address.setZipCode(addressDTO.getZipCode());
+        address.setLatitude(addressDTO.getLatitude());
+        address.setLongitude(addressDTO.getLongitude());
         address.setComplement(addressDTO.getComplement());
         address.setStreetName(addressDTO.getStreetName());
         address.setNeighbourhood(addressDTO.getNeighbourhood());
